@@ -8,20 +8,29 @@ using IConnection connection = factory.CreateConnection();
 using IModel channel = connection.CreateModel();
 
 channel.ExchangeDeclare(
-    exchange: "topic-exchange-example",
-    type: ExchangeType.Topic
+    exchange: "header-exchange-example",
+    type: ExchangeType.Headers
     );
 
 for (int i = 0; i < 100; i++)
 {
     await Task.Delay(200);
-    byte[] message = Encoding.UTF8.GetBytes($"merhaba {i}");
-    Console.Write("Topic Belirtiniz : ");
-    string topic = Console.ReadLine();
+    byte[] message = Encoding.UTF8.GetBytes($"Merhaba : {i}");
+    Console.WriteLine("Lütfen girin value : ");
+    string value = Console.ReadLine();
+
+    IBasicProperties basicProporites = channel.CreateBasicProperties();
+
+    basicProporites.Headers = new Dictionary<string, object>
+    {
+        ["no"] = value
+    };
+
     channel.BasicPublish(
-        exchange: "topic-exchange-example",
-        routingKey: "topic",
-        body: message
+        exchange: "header-exchange-example",
+        routingKey: string.Empty,
+        body: message,
+        basicProperties: basicProporites
         );
 }
 
